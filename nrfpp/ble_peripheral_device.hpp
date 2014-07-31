@@ -39,7 +39,7 @@ namespace nrfpp {
 
 namespace nrfpp {
 
-class BLEPeriferalDevice
+class BLEPeripheralDevice
 {
 public:
     struct Params 
@@ -73,7 +73,7 @@ public:
     };
 
 private:
-    BLEPeriferalDevice() {}
+    BLEPeripheralDevice() {}
 
 public:
     static void init(const Params& dp, 

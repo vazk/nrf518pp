@@ -1,11 +1,11 @@
-#ifndef NRFX_TIMER_HPP
-#define NRFX_TIMER_HPP
+#ifndef NRFPP_TIMER_HPP
+#define NRFPP_TIMER_HPP
 
 extern "C" {
 #include "app_timer.h"
 }
 
-namespace nrfx {
+namespace nrfpp {
 
 enum TimerTypeEN {
     TIMER_SINGLESHOT = APP_TIMER_MODE_SINGLE_SHOT,

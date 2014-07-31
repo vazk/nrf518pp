@@ -61,7 +61,7 @@ int main(void)
     //nrfpp::Timer<BASHandler> bas_handler(nrfpp::TIMER_REPEATED);
     //status = bas_handler.is_good();
 
-    nrfpp::BLEPeriferalDevice::Params dp;
+    nrfpp::BLEPeripheralDevice::Params dp;
     dp.name = "poxosBLE";
     dp.cconf = nrfpp::SYNTH_250;
     dp.adv_interval_ms = 25;
@@ -72,7 +72,7 @@ int main(void)
     dp.slave_latency_ms = 0;
     dp.conn_supervisory_timeout_ms = 4000;
 
-    nrfpp::BLEPeriferalDevice::SecurityParams sp;
+    nrfpp::BLEPeripheralDevice::SecurityParams sp;
     sp.sec_timeout_s = 30;
     sp.sec_bond = true;
     sp.sec_mitm = false;
@@ -81,12 +81,12 @@ int main(void)
     sp.sec_min_key_size = 7;
     sp.sec_max_key_size = 16;
 
-    nrfpp::BLEPeriferalDevice::ConnectionParams cp;
+    nrfpp::BLEPeripheralDevice::ConnectionParams cp;
     cp.conn_max_negotiation_attempts = 3;
     cp.conn_first_params_update_delay_ms = 5000;
     cp.conn_next_params_update_delay_ms = 10000;
 
-    nrfpp::BLEPeriferalDevice::init(dp, sp, cp);
+    nrfpp::BLEPeripheralDevice::init(dp, sp, cp);
 
     nrfpp::BLEService* bs = new nrfpp::BLEService(0x1523, BLE_UUID_TYPE_BLE);
     nrfpp::BLECharacteristic* ch = new nrfpp::BLECharacteristic(0x1524, "bla",
@@ -95,17 +95,17 @@ int main(void)
                                                               1, nrfpp::LOC_STACK);
     bs->add_characteristic(ch);
     
-    nrfpp::BLEPeriferalDevice::add_service(bs);
+    nrfpp::BLEPeripheralDevice::add_service(bs);
 
     //bas_handler.start(500);
     //status = bas_handler.is_good();
 
-    nrfpp::BLEPeriferalDevice::start_advertising();
+    nrfpp::BLEPeripheralDevice::start_advertising();
 
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 
     while(true) {
-        nrfpp::BLEPeriferalDevice::idle();
+        nrfpp::BLEPeripheralDevice::idle();
     }
 
     return 0;

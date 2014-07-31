@@ -59,7 +59,7 @@ BLECharacteristic::register_self(uint16_t service_handle,
 {
     ble_uuid_.type = uuid_type;
     uint32_t result = nrfpp_sd_ble_gatts_characteristic_add(service_handle, 
-                           i                                 &char_md_, 
+                                                            &char_md_, 
                                                             &attr_value_,
                                                             &char_handles_);
     return (result == NRF_SUCCESS);
