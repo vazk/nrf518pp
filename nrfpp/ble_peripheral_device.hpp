@@ -12,7 +12,6 @@ extern "C" {
 #include "softdevice_handler.h"
 }
 
-#include "ble_service.hpp"
 #include <list>
 #include <string>
 #include <stdint.h>
@@ -39,6 +38,9 @@ namespace nrfpp {
 
 namespace nrfpp {
 
+class BLEAdvertisingData;
+class BLEService;
+
 class BLEPeripheralDevice
 {
 public:
@@ -46,7 +48,7 @@ public:
     {
         std::string name;
         ClockConfEN cconf;
-        // advertisement
+        // advertising
         uint32_t adv_interval_ms;
         uint32_t adv_timeout_s;
         //
@@ -71,6 +73,8 @@ public:
         uint32_t conn_first_params_update_delay_ms;
         uint32_t conn_next_params_update_delay_ms;
     };
+    typedef std::list<BLEAdvertisingData*> AdvertisingDataArray;
+    typedef std::list<BLEService*>         ServiceArray;
 
 private:
     BLEPeripheralDevice() {}
@@ -80,19 +84,22 @@ public:
                      const SecurityParams& sp,
                      const ConnectionParams& cp);
     static void add_service(BLEService* service);
-    static void start_advertising();
+    static void add_advertising_data(BLEAdvertisingData* adv_data);
 
-    static void start_softdevice();
-    static void stop_softdevice();
+    static void start_advertising();
+    static void update_advertising();
+
+    static void start();
+    static void stop();
 
     static void idle();
     
     static bool is_good();
 
 private:
-    static void event_dispatcher(ble_evt_t* evt);
+    static void application_event_dispatcher(ble_evt_t* evt);
+    static void system_event_dispatcher(uint32_t evt);
     static void init_gap();
-    static void init_advertising();
     static void init_connection();
     static void init_security();
 
@@ -101,9 +108,10 @@ private:
     static Params dp_;
     static SecurityParams   sp_;
     static ConnectionParams cp_;
-    static ble_gap_sec_params_t   sec_params_;
-    static ble_gap_adv_params_t   adv_params_;
-    static std::list<BLEService*> services_;
+    static ble_gap_sec_params_t sec_params_;
+    static ble_gap_adv_params_t adv_params_;
+    static AdvertisingDataArray advertising_data_;
+    static ServiceArray         services_;
 };
 
 }

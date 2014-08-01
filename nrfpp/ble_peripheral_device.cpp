@@ -1,4 +1,6 @@
 #include "ble_peripheral_device.hpp"
+#include "ble_service.hpp"
+#include "ble_advertising_data.hpp"
 #include "timer.hpp"
 
 extern "C" {
@@ -13,11 +15,13 @@ extern "C" {
 }
 
 #include <vector>
+#include <assert.h>
 
 void 
 app_error_handler(uint32_t error_code, uint32_t line_num, const uint8_t * p_file_name)
 {
     // do whatever
+    assert(0);
     while(true);
 }
 
@@ -25,12 +29,14 @@ void
 assert_nrf_callback(uint16_t line_num, const uint8_t * p_file_name)
 {
     // do whatever...
+    assert(0);
     while(true);
 }
 
 void 
 conn_params_error_handler(uint32_t nrf_error)
 {
+    assert(0);
     // do whatever...
     while(true);
 }
@@ -43,13 +49,14 @@ conn_params_error_handler(uint32_t nrf_error)
 namespace nrfpp {
 
 // initialization of static members...
-bool                        BLEPeripheralDevice::good_ = false;
-BLEPeripheralDevice::Params           BLEPeripheralDevice::dp_;
-BLEPeripheralDevice::SecurityParams   BLEPeripheralDevice::sp_;
-BLEPeripheralDevice::ConnectionParams BLEPeripheralDevice::cp_;
-ble_gap_sec_params_t        BLEPeripheralDevice::sec_params_;
-ble_gap_adv_params_t        BLEPeripheralDevice::adv_params_;
-std::list<BLEService*>      BLEPeripheralDevice::services_;
+bool BLEPeripheralDevice::good_ = false;
+BLEPeripheralDevice::Params                BLEPeripheralDevice::dp_;
+BLEPeripheralDevice::SecurityParams        BLEPeripheralDevice::sp_;
+BLEPeripheralDevice::ConnectionParams      BLEPeripheralDevice::cp_;
+BLEPeripheralDevice::ServiceArray          BLEPeripheralDevice::services_;
+BLEPeripheralDevice::AdvertisingDataArray  BLEPeripheralDevice::advertising_data_;
+ble_gap_sec_params_t   BLEPeripheralDevice::sec_params_;
+ble_gap_adv_params_t   BLEPeripheralDevice::adv_params_;
 
 void
 BLEPeripheralDevice::init(const BLEPeripheralDevice::Params& dp,
@@ -61,7 +68,7 @@ BLEPeripheralDevice::init(const BLEPeripheralDevice::Params& dp,
     cp_ = cp;
 
     // start BLE stack
-    start_softdevice();
+    start();
     if(!good_) return;
 
     // initialize GAP params
@@ -70,19 +77,19 @@ BLEPeripheralDevice::init(const BLEPeripheralDevice::Params& dp,
 }
 
 void 
-BLEPeripheralDevice::start_softdevice()
+BLEPeripheralDevice::start()
 {
     SOFTDEVICE_HANDLER_INIT(dp_.cconf, false);
-    uint32_t result = softdevice_ble_evt_handler_set(event_dispatcher);
+    uint32_t result = softdevice_ble_evt_handler_set(application_event_dispatcher);
     good_ = (result == NRF_SUCCESS);
 
     if(!good_) return;
 
-    //err_code = softdevice_sys_evt_handler_set(sys_evt_dispatch);
-    //good_ = (result == NRF_SUCCESS);
+    result = softdevice_sys_evt_handler_set(system_event_dispatcher);
+    good_ = (result == NRF_SUCCESS);
 }
 
-void BLEPeripheralDevice::stop_softdevice()
+void BLEPeripheralDevice::stop()
 {
     uint32_t result = softdevice_handler_sd_disable();
     good_ = (result == NRF_SUCCESS);
@@ -97,7 +104,7 @@ BLEPeripheralDevice::idle()
 }
 
 void 
-BLEPeripheralDevice::event_dispatcher(ble_evt_t* evt)
+BLEPeripheralDevice::application_event_dispatcher(ble_evt_t* evt)
 {
     // standard event handler for system/connectivity events
     ble_conn_params_on_ble_evt(evt);
@@ -187,16 +194,28 @@ BLEPeripheralDevice::event_dispatcher(ble_evt_t* evt)
 }
 
 void 
+BLEPeripheralDevice::system_event_dispatcher(uint32_t evt)
+{
+    assert(0);
+}
+
+void 
 BLEPeripheralDevice::add_service(BLEService* service)
 {
     services_.push_back(service);
 }
 
 void 
+BLEPeripheralDevice::add_advertising_data(BLEAdvertisingData* advdata)
+{
+    advertising_data_.push_back(advdata);
+}
+
+void 
 BLEPeripheralDevice::start_advertising()
 {
     // initialize advertising parameters (used when starting advertising).
-    init_advertising();
+    update_advertising();
     if(!good_) return;
 
     // initialize connection parameters
@@ -254,7 +273,7 @@ BLEPeripheralDevice::init_gap()
 }
 
 void 
-BLEPeripheralDevice::init_advertising()
+BLEPeripheralDevice::update_advertising()
 {
 
     // initialize advertising
@@ -263,13 +282,24 @@ BLEPeripheralDevice::init_advertising()
     
     ble_uuid_t* adv_uuids = new ble_uuid_t[services_.size()];
     //ble_uuid_t adv_uuids[1];
-    std::list<BLEService*>::iterator sit = services_.begin();
-    std::list<BLEService*>::iterator esit = services_.end();
-    for(int i = 0; sit != esit; ++sit, ++i) {
+    size_t i = 0;
+    ServiceArray::iterator sit = services_.begin();
+    ServiceArray::iterator esit = services_.end();
+    for(i = 0; sit != esit; ++sit, ++i) {
         adv_uuids[i].uuid = (*sit)->uuid();
         adv_uuids[i].type = BLE_UUID_TYPE_BLE;//(*sit)->uuid_type();
     }
-    std::vector<int> bla;
+
+    ble_advdata_service_data_t* service_data = 
+                new ble_advdata_service_data_t[advertising_data_.size()];
+    AdvertisingDataArray::iterator ait = advertising_data_.begin();
+    AdvertisingDataArray::iterator eait = advertising_data_.end();
+    for(i = 0; ait != eait; ++ait, ++i) {
+        service_data[0].service_uuid = (*ait)->uuid();
+        service_data[0].data.size    = (*ait)->size();
+        service_data[0].data.p_data  = (*ait)->data();
+    }
+
 
      
     //ble_uuid_t adv_uuids[] = 
@@ -285,13 +315,16 @@ BLEPeripheralDevice::init_advertising()
     advdata.include_appearance      = true;
     advdata.flags.size              = sizeof(flags);
     advdata.flags.p_data            = &flags;
-    //advdata.uuids_complete.uuid_cnt = services_.size();
-    advdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
+    advdata.service_data_count      = advertising_data_.size();
+    advdata.p_service_data_array    = service_data;
+    advdata.uuids_complete.uuid_cnt = services_.size();
+    //advdata.uuids_complete.uuid_cnt = sizeof(adv_uuids) / sizeof(adv_uuids[0]);
     advdata.uuids_complete.p_uuids  = adv_uuids;
     
     uint32_t result = ble_advdata_set(&advdata, NULL);
     good_ = (result == NRF_SUCCESS);
     delete[] adv_uuids;
+    delete[] service_data;
 }
 
 void 
