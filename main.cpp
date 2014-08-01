@@ -17,6 +17,7 @@ extern "C" {
 #include "nrfpp/ble_peripheral_device.hpp"
 #include "nrfpp/ble_service.hpp"
 #include "nrfpp/ble_characteristic.hpp"
+#include "nrfpp/ble_advertising_data.hpp"
 #include "nrfpp/timer.hpp"
 
 #define PIN_0 0
@@ -40,6 +41,32 @@ public:
         off = !off;
     }
 };
+
+class TestAdvData : public nrfpp::BLEAdvertisingData
+{
+public:
+    TestAdvData() : BLEAdvertisingData(0x1527), byte_(0) {}
+    uint16_t size() { return 1; }
+    uint8_t* data() { return &byte_; }
+    void incr() { byte_++; }
+private:
+    uint8_t byte_;
+};
+
+
+class AdvDataUpdater
+{
+public:
+    AdvDataUpdater(TestAdvData* tad) {}
+    static void on_timer(void* context) {
+        TestAdvData* tad = (TestAdvData*)context;
+        tad->incr();
+        nrfpp::BLEPeripheralDevice::update_advertising();
+    }
+    
+};
+
+
 
 #define SCHED_MAX_EVENT_DATA_SIZE       sizeof(app_timer_event_t) /**< Maximum size of scheduler events. Note that scheduler BLE stack events do not contain any data, as the events are being pulled from the stack in the event handler. */
 #define SCHED_QUEUE_SIZE                10 /**< Maximum number of events in the scheduler queue. */
@@ -96,6 +123,15 @@ int main(void)
     bs->add_characteristic(ch);
     
     nrfpp::BLEPeripheralDevice::add_service(bs);
+
+    TestAdvData* tad = new TestAdvData();
+    nrfpp::BLEPeripheralDevice::add_advertising_data(tad);
+
+    nrfpp::Timer<AdvDataUpdater> adu_timer(nrfpp::TIMER_REPEATED, tad);
+    status = timer.is_good();
+    adu_timer.start(800);
+    status = adu_timer.is_good();
+
 
     //bas_handler.start(500);
     //status = bas_handler.is_good();
