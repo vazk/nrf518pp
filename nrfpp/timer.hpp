@@ -33,8 +33,9 @@ template <typename TimerEventHandler>
 class Timer : public TimerInitializer
 {
 public:
-    explicit Timer(TimerTypeEN t) 
-     : good_(false) 
+    explicit Timer(TimerTypeEN t, void* context = NULL) 
+     : good_(false),
+       context_(context)
     {
         uint32_t result = app_timer_create(&timer_id_, (app_timer_mode_t)t, 
                                            TimerEventHandler::on_timer);
@@ -43,7 +44,7 @@ public:
     void start(uint32_t ms) 
     {
         uint32_t ticks = APP_TIMER_TICKS(ms, PRESCALER);
-        uint32_t result = app_timer_start(timer_id_, ticks, NULL);
+        uint32_t result = app_timer_start(timer_id_, ticks, context_);
         good_ = (result == NRF_SUCCESS);
     }
     void stop() 
@@ -56,7 +57,8 @@ public:
     }
 
 private:
-    bool good_;
+    bool    good_;
+    void*   context_;
     app_timer_id_t  timer_id_;    
 };
 
