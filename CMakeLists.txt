@@ -82,24 +82,7 @@ SET(CMAKE_EXE_LINKER_FLAGS "-Xlinker -Map=binary.map -mcpu=${CPU} -mthumb -mabi=
 ADD_SUBDIRECTORY(nrfpp)
 
 ###################################################
-#### SETTING UP THE PROJECT                    ####
+#### PREPARING THE APP 			       ####
 ###################################################
-
-SET(OUTPUT_FILENAME  nrfp_test)
-
-SET(PROJECT_SOURCES  main.cpp)
-SET(NRF_ASM_SOURCES  ${TEMPLATE_PATH}/gcc/gcc_startup_${DEVICESERIES}.s)
-
-
-
-ADD_EXECUTABLE(${OUTPUT_FILENAME}.elf ${PROJECT_SOURCES} ${NRF_SOURCES} ${NRF_ASM_SOURCES} )
-TARGET_LINK_LIBRARIES(${OUTPUT_FILENAME}.elf nrfpp)
-
-ADD_CUSTOM_COMMAND(OUTPUT ${OUTPUT_FILENAME}.bin
-    COMMAND ${CMAKE_OBJCOPY} --output-format=binary ${OUTPUT_FILENAME}.elf ${OUTPUT_FILENAME}.bin
-    DEPENDS ${OUTPUT_FILENAME}.elf
-    COMMENT "generating ${OUTPUT_FILENAME}.bin")
-ADD_CUSTOM_TARGET(bin ALL DEPENDS ${OUTPUT_FILENAME}.bin)
-
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${OUTPUT_FILENAME}.bin)
+ADD_SUBDIRECTORY(testers)
 
