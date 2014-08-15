@@ -84,5 +84,6 @@ ADD_SUBDIRECTORY(nrfpp)
 ###################################################
 #### PREPARING THE APP 			       ####
 ###################################################
-ADD_SUBDIRECTORY(testers)
+ADD_SUBDIRECTORY(test_adv_data)
+ADD_SUBDIRECTORY(test_pwm)
 
