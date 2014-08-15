@@ -1,6 +1,6 @@
 SET(OUTPUT_FILENAME  test_adv_data)
 
-SET(PROJECT_SOURCES  test_adv_data.cpp)
+SET(PROJECT_SOURCES  main.cpp)
 SET(NRF_ASM_SOURCES  ${TEMPLATE_PATH}/gcc/gcc_startup_${DEVICESERIES}.s)
 
 
