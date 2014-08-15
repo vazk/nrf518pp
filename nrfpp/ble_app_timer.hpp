@@ -13,14 +13,14 @@ enum TimerTypeEN {
 };
 
 
-class TimerInitializer 
+class BLEAppTimerInitializer 
 {
 public:
     static const int PRESCALER = 0;
     static const int NUM_TIMERS = 6;
     static const int QUEUE_SIZE = 4;
 protected:
-    TimerInitializer() {
+    BLEAppTimerInitializer() {
         static bool is_timer_module_initialized = false;
         if(!is_timer_module_initialized) {
             APP_TIMER_INIT(PRESCALER, NUM_TIMERS, QUEUE_SIZE, false);
@@ -30,10 +30,10 @@ protected:
 };
 
 template <typename TimerEventHandler>
-class Timer : public TimerInitializer
+class BLEAppTimer : public BLEAppTimerInitializer
 {
 public:
-    explicit Timer(TimerTypeEN t, void* context = NULL) 
+    explicit BLEAppTimer(TimerTypeEN t, void* context = NULL) 
      : good_(false),
        context_(context)
     {

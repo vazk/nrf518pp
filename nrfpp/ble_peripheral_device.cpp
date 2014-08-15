@@ -1,7 +1,7 @@
 #include "ble_peripheral_device.hpp"
 #include "ble_service.hpp"
 #include "ble_advertising_data.hpp"
-#include "timer.hpp"
+#include "ble_app_timer.hpp"
 
 extern "C" {
 #include "app_util.h"
@@ -336,9 +336,9 @@ BLEPeripheralDevice::init_connection()
     memset(&connection_params_init, 0, sizeof(connection_params_init));
     connection_params_init.p_conn_params                  = NULL;
     connection_params_init.first_conn_params_update_delay = 
-               APP_TIMER_TICKS(cp_.conn_first_params_update_delay_ms, TimerInitializer::PRESCALER);
+               APP_TIMER_TICKS(cp_.conn_first_params_update_delay_ms, BLEAppTimerInitializer::PRESCALER);
     connection_params_init.next_conn_params_update_delay  = 
-               APP_TIMER_TICKS(cp_.conn_next_params_update_delay_ms, TimerInitializer::PRESCALER);
+               APP_TIMER_TICKS(cp_.conn_next_params_update_delay_ms, BLEAppTimerInitializer::PRESCALER);
     connection_params_init.max_conn_params_update_count   = cp_.conn_max_negotiation_attempts;
     connection_params_init.start_on_notify_cccd_handle    = BLE_GATT_HANDLE_INVALID;
     connection_params_init.disconnect_on_fail             = true;
