@@ -86,4 +86,5 @@ ADD_SUBDIRECTORY(nrfpp)
 ###################################################
 ADD_SUBDIRECTORY(test_adv_data)
 ADD_SUBDIRECTORY(test_pwm)
+ADD_SUBDIRECTORY(test_timer)
 
