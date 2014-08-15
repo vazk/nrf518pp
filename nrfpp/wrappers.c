@@ -68,3 +68,27 @@ uint32_t nrfpp_sd_ble_uuid_vs_add(ble_uuid128_t const* vs_uuid, uint8_t* uuid_ty
 {
     return sd_ble_uuid_vs_add(vs_uuid, uuid_type);
 }
+
+uint32_t nrfpp_sd_nvic_SetPriority(IRQn_Type IRQn, nrf_app_irq_priority_t priority)
+{
+    return sd_nvic_SetPriority(IRQn, priority);
+}
+
+uint32_t nrfpp_sd_nvic_EnableIRQ(IRQn_Type IRQn)
+{
+    return sd_nvic_EnableIRQ(IRQn);
+}
+
+uint32_t nrfpp_sd_ppi_channel_assign(uint8_t channel_num, 
+                                     const volatile void* evt_endpoint, 
+                                     const volatile void* task_endpoint)
+{
+    return sd_ppi_channel_assign(channel_num, 
+                                 evt_endpoint, 
+                                 task_endpoint);
+}
+
+uint32_t nrfpp_sd_ppi_channel_enable_set(uint32_t channel_enable_set_msk)
+{
+    return sd_ppi_channel_enable_set(channel_enable_set_msk);
+}

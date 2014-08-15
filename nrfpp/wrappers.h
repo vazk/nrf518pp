@@ -40,3 +40,13 @@ uint32_t nrfpp_sd_ble_gatts_characteristic_add(uint16_t                   servic
                                               ble_gatts_char_handles_t*  const handles);
 
 uint32_t nrfpp_sd_ble_uuid_vs_add(ble_uuid128_t const* vs_uuid, uint8_t* uuid_type);
+
+uint32_t nrfpp_sd_nvic_SetPriority(IRQn_Type IRQn, nrf_app_irq_priority_t priority);
+
+uint32_t nrfpp_sd_nvic_EnableIRQ(IRQn_Type IRQn);
+
+uint32_t nrfpp_sd_ppi_channel_assign(uint8_t channel_num, 
+                                     const volatile void * evt_endpoint, 
+                                     const volatile void * task_endpoint);
+
+uint32_t nrfpp_sd_ppi_channel_enable_set(uint32_t channel_enable_set_msk);
