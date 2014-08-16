@@ -91,10 +91,6 @@ int main(void)
     adu_timer.start(800);
     status = adu_timer.is_good();
 
-
-    //bas_handler.start(500);
-    //status = bas_handler.is_good();
-
     BLEPeripheralDevice::start_advertising();
 
     APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
