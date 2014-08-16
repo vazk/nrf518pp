@@ -2,6 +2,8 @@
 SET(OUTPUT_FILENAME  nrfpp)
 
 SET(PROJECT_SOURCES  wrappers.c
+                     pwm.cpp
+                     buzzer.cpp
                      ble_peripheral_device.cpp
                      ble_service.cpp
                      ble_characteristic.cpp)
