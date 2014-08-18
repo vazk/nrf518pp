@@ -38,8 +38,7 @@ protected:
        PWM_timer_prescaler_(tpsc),
        num_channels_(0),
        initialized_(false),
-       pwm_max_value(64),
-       pwm_next_max_value(64)
+       pwm_max_value_(0)
     {
         memset(channels_, 0, sizeof channels_);
         static bool is_hfclk_initialized = false;
@@ -63,7 +62,7 @@ public:
         PWM_timer_->PRESCALER = (uint32_t)PWM_timer_prescaler_;
         PWM_timer_->TASKS_CLEAR = 1;
         PWM_timer_->BITMODE = TIMER_BITMODE_BITMODE_16Bit;
-        PWM_timer_->CC[3] = pwm_next_max_value = pwm_max_value;
+        PWM_timer_->CC[3] = pwm_max_value_;
         PWM_timer_->MODE = TIMER_MODE_MODE_Timer;
         PWM_timer_->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk;
         PWM_timer_->EVENTS_COMPARE[0] = PWM_timer_->EVENTS_COMPARE[1] = 
@@ -108,13 +107,27 @@ public:
         channels_[num_channels_++] = ch;
     }
 
-    bool set_channel_value(uint32_t chi, uint32_t value, uint32_t duty_cycle)
+    bool set_max_value(uint32_t value)
+    {
+        pwm_max_value_ = value;
+
+        PWM_timer_->EVENTS_COMPARE[3] = 0;
+        PWM_timer_->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
+        if((PWM_timer_->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
+            PWM_timer_->TASKS_STOP = 1;
+            PWM_timer_->INTENSET = TIMER_INTENSET_COMPARE3_Msk;  
+        }
+        PWM_timer_->TASKS_START = 1;  
+    }
+
+
+    bool set_channel_dutycycle(uint32_t chi, uint32_t duty_cycle)
     {
         if(chi < 0 || chi >= num_channels_) {
             return false;
         }
-        pwm_next_max_value = value;
-        channels_[chi]->target_value = value * duty_cycle / 100;
+
+        channels_[chi]->target_value = pwm_max_value_ * duty_cycle / 100;
         PWM_timer_->EVENTS_COMPARE[3] = 0;
         PWM_timer_->SHORTS = TIMER_SHORTS_COMPARE3_CLEAR_Msk | TIMER_SHORTS_COMPARE3_STOP_Msk;
         if((PWM_timer_->INTENSET & TIMER_INTENSET_COMPARE3_Msk) == 0) {
@@ -145,14 +158,14 @@ public:
         uint32_t i; 
         PWM_timer_->EVENTS_COMPARE[3] = 0;
         PWM_timer_->INTENCLR = 0xFFFFFFFF;
-        PWM_timer_->CC[3] = pwm_max_value = pwm_next_max_value;
+        PWM_timer_->CC[3] = pwm_max_value_;
         for(i = 0; i < num_channels_; i++) {
             if(channels_[i]->target_value == 0) {
                 nrf_gpiote_unconfig(channels_[i]->gpiote_channel);
                 nrf_gpio_pin_write(channels_[i]->gpio_pin, 0);
                 channels_[i]->running = false;
             } else
-            if (channels_[i]->target_value >= pwm_max_value) {
+            if (channels_[i]->target_value >= pwm_max_value_) {
                 nrf_gpiote_unconfig(channels_[i]->gpiote_channel);
                 nrf_gpio_pin_write(channels_[i]->gpio_pin, 1); 
                 channels_[i]->running = false;
@@ -181,7 +194,7 @@ protected:
     uint32_t        num_channels_;
     bool            initialized_;
     // review these
-    uint32_t pwm_max_value, pwm_next_max_value;
+    uint32_t pwm_max_value_;
 };
 
 template <int TIMER>
