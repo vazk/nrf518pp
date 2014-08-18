@@ -66,11 +66,12 @@ class PWMBase;
 class Buzzer
 {
 public:
-    Buzzer(PWMBase* pwm, uint32_t chi);
+    Buzzer(PWMBase* pwm, uint32_t chi, uint32_t duty = 50);
     void play(melody::Note note, melody::Octave octave = melody::O5);
 private:
     PWMBase* pwm_;
     uint32_t chi_;
+    uint32_t duty_; 
 };
 
 }
