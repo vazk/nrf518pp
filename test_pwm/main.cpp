@@ -36,19 +36,21 @@ int main(void)
     p->initialize();
 
     int duty = 0;
-    int val = 100;
-    int change = 1;
+    int change = 10;
+
+    p->set_max_value(100);
+
     while(true) {
 
         duty += change;
-        if(duty == 100) change = -1;
+        if(duty == 100) change = -10;
         else
-        if(duty == 0) change = 1;
+        if(duty == 0) change = 10;
 
-        p->set_channel_value(0, val, duty);
-        p->set_channel_value(1, val, 100-duty);
+        p->set_channel_dutycycle(0, duty);
+        p->set_channel_dutycycle(1, 100-duty);
 
-        nrf_delay_ms(20);
+        nrf_delay_ms(40);
     }
 
     return 0;
