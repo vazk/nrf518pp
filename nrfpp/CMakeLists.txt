@@ -5,6 +5,7 @@ SET(PROJECT_SOURCES  wrappers.c
                      pwm.cpp
                      buzzer.cpp
                      ble_peripheral_device.cpp
+                     ble_application.cpp
                      ble_service.cpp
                      ble_characteristic.cpp)
 SET(NRF_SOURCES      ${TEMPLATE_PATH}/system_${DEVICESERIES}.c
@@ -20,4 +21,4 @@ SET(NRF_SOURCES      ${TEMPLATE_PATH}/system_${DEVICESERIES}.c
                     )
 
 
-ADD_LIBRARY(${OUTPUT_FILENAME} STATIC ${PROJECT_SOURCES} ${NRF_SOURCES} ${NRF_ASM_SOURCES} )
+ADD_LIBRARY(${OUTPUT_FILENAME} STATIC ${NRF_SOURCES} ${PROJECT_SOURCES} ${NRF_ASM_SOURCES} )
