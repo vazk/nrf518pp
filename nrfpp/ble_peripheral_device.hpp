@@ -97,7 +97,7 @@ public:
     static bool is_good();
 
 private:
-    static void application_event_dispatcher(ble_evt_t* evt);
+    static void peripheraldevice_event_dispatcher(ble_evt_t* evt);
     static void system_event_dispatcher(uint32_t evt);
     static void init_gap();
     static void init_connection();

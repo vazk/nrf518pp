@@ -4,8 +4,6 @@
 #include "ble_app_timer.hpp"
 
 extern "C" {
-#include "app_util.h"
-#include "app_scheduler.h"
 #include "ble_types.h"
 #include "ble_srv_common.h"
 #include "ble_conn_params.h"
@@ -80,7 +78,7 @@ void
 BLEPeripheralDevice::start()
 {
     SOFTDEVICE_HANDLER_INIT(dp_.cconf, false);
-    uint32_t result = softdevice_ble_evt_handler_set(application_event_dispatcher);
+    uint32_t result = softdevice_ble_evt_handler_set(peripheraldevice_event_dispatcher);
     good_ = (result == NRF_SUCCESS);
 
     if(!good_) return;
@@ -98,13 +96,12 @@ void BLEPeripheralDevice::stop()
 void 
 BLEPeripheralDevice::idle()
 {
-    app_sched_execute();
     uint32_t result = nrfpp_sd_app_evt_wait();
     good_ = (result == NRF_SUCCESS);
 }
 
 void 
-BLEPeripheralDevice::application_event_dispatcher(ble_evt_t* evt)
+BLEPeripheralDevice::peripheraldevice_event_dispatcher(ble_evt_t* evt)
 {
     // standard event handler for system/connectivity events
     ble_conn_params_on_ble_evt(evt);
@@ -332,13 +329,16 @@ BLEPeripheralDevice::init_connection()
 {
     uint32_t result;
     ble_conn_params_init_t connection_params_init;
+
+    BLEApplication& app = BLEApplication::instance();
+    assert(app.is_initialized()); 
     
     memset(&connection_params_init, 0, sizeof(connection_params_init));
     connection_params_init.p_conn_params                  = NULL;
     connection_params_init.first_conn_params_update_delay = 
-               APP_TIMER_TICKS(cp_.conn_first_params_update_delay_ms, BLEAppTimerInitializer::PRESCALER);
+               APP_TIMER_TICKS(cp_.conn_first_params_update_delay_ms, app.config().timer_prescaler);
     connection_params_init.next_conn_params_update_delay  = 
-               APP_TIMER_TICKS(cp_.conn_next_params_update_delay_ms, BLEAppTimerInitializer::PRESCALER);
+               APP_TIMER_TICKS(cp_.conn_next_params_update_delay_ms, app.config().timer_prescaler);
     connection_params_init.max_conn_params_update_count   = cp_.conn_max_negotiation_attempts;
     connection_params_init.start_on_notify_cccd_handle    = BLE_GATT_HANDLE_INVALID;
     connection_params_init.disconnect_on_fail             = true;
