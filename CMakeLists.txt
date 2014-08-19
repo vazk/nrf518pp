@@ -88,4 +88,5 @@ ADD_SUBDIRECTORY(test_adv_data)
 ADD_SUBDIRECTORY(test_pwm)
 ADD_SUBDIRECTORY(test_buzzer)
 ADD_SUBDIRECTORY(test_timer)
+ADD_SUBDIRECTORY(test_buzzer_led_timer)
 
