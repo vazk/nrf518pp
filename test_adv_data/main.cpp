@@ -36,17 +36,17 @@ public:
     
 };
 
-
-
-#define SCHED_MAX_EVENT_DATA_SIZE       sizeof(app_timer_event_t) /**< Maximum size of scheduler events. Note that scheduler BLE stack events do not contain any data, as the events are being pulled from the stack in the event handler. */
-#define SCHED_QUEUE_SIZE                10 /**< Maximum number of events in the scheduler queue. */
-
+using nrfpp::BLEApplication;
 using  nrfpp::BLEPeripheralDevice;
 using  nrfpp::BLEService;
 using  nrfpp::BLECharacteristic;
 
 int main(void)
 {
+
+    BLEApplication& app = BLEApplication::instance();
+    app.initialize(BLEApplication::Config());
+
     BLEPeripheralDevice::Params dp;
     dp.name = "poxosBLE";
     dp.cconf = nrfpp::SYNTH_250;
@@ -93,9 +93,8 @@ int main(void)
 
     BLEPeripheralDevice::start_advertising();
 
-    APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-
     while(true) {
+        app.idle();
         BLEPeripheralDevice::idle();
     }
 

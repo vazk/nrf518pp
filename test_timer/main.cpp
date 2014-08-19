@@ -1,15 +1,7 @@
-//#include <stdbool.h>
-#include <stdint.h>
-//#include <string.h>
-
-extern "C" {
-#include "nrf_delay.h"
-#include "nrf_gpio.h"
-}
-
-
 #include "nrfpp/ble_app_timer.hpp"
-#include "nrfpp/ble_peripheral_device.hpp"
+#include "nrfpp/ble_application.hpp"
+#include "nrf_gpio.h"
+#include <stdint.h>
 
 #define PIN_3 3
 #define PIN_5 5
@@ -31,15 +23,8 @@ public:
     }
 };
 
-
-// Maximum size of scheduler events. Note that scheduler BLE stack events do not contain 
-// any data, as the events are being pulled from the stack in the event handler. 
-#define SCHED_MAX_EVENT_DATA_SIZE       sizeof(app_timer_event_t) 
-// Maximum number of events in the scheduler queue. *
-#define SCHED_QUEUE_SIZE                10
-
 using nrfpp::BLEAppTimer;
-using nrfpp::BLEPeripheralDevice;
+using nrfpp::BLEApplication;
 
 int main(void)
 {
@@ -47,18 +32,16 @@ int main(void)
     nrf_gpio_cfg_output(PIN_3);
     nrf_gpio_cfg_output(PIN_5);
 
+    BLEApplication& app = BLEApplication::instance();
+    app.initialize(BLEApplication::Config());
+
     BLEAppTimer<LEDSwitcher> timer(nrfpp::TIMER_REPEATED);
     bool status = timer.is_good();
     timer.start(300);
     status = timer.is_good();
 
-    APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-
-    BLEPeripheralDevice::start();
-
-
     while(true) {
-        BLEPeripheralDevice::idle();
+        app.idle();
     }
 
     return 0;

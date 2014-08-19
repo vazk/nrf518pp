@@ -5,17 +5,15 @@
 #include "nrfpp/pwm.hpp"
 #include "nrfpp/buzzer.hpp"
 #include "nrfpp/ble_app_timer.hpp"
-#include "nrfpp/ble_peripheral_device.hpp"
-extern "C" {
+#include "nrfpp/ble_application.hpp"
 #include "nrf_delay.h"
-}
 
 
 using nrfpp::PWMBase;
 using nrfpp::PWM;
 using nrfpp::Buzzer;
 using nrfpp::BLEAppTimer;
-using nrfpp::BLEPeripheralDevice;
+using nrfpp::BLEApplication;
 using namespace nrfpp::melody;
 
 struct OneTick
@@ -88,39 +86,37 @@ public:
 
 int main(void)
 {
+    BLEApplication& app = BLEApplication::instance();
+    app.initialize(BLEApplication::Config());
 
     PWMBase* p = PWM<2>::instance();
-    PWMBase::Channel* ch = new PWMBase::Channel();
-    ch->gpio_pin = 7;
-    ch->gpiote_channel = 2;
-    ch->ppi_channels[0] = 0;
-    ch->ppi_channels[1] = 1;
-    ch->target_value = 100;
 
+    PWMBase::Channel* ch_buz = new PWMBase::Channel();
+    ch_buz->gpio_pin = 7;
+    ch_buz->gpiote_channel = 2;
+    ch_buz->ppi_channels[0] = 0;
+    ch_buz->ppi_channels[1] = 1;
+    ch_buz->target_value = 100;
 
-    p->add_channel(ch);
+    PWMBase::Channel* ch_led0 = new PWMBase::Channel();
+    ch_led0->gpio_pin = 3;
+    ch_led0->gpiote_channel = 1;
+    ch_led0->ppi_channels[0] = 2;
+    ch_led0->ppi_channels[1] = 3;
+    ch_led0->target_value = 100;
 
+    PWMBase::Channel* ch_led1 = new PWMBase::Channel();
+    ch_led1->gpio_pin = 5;
+    ch_led1->gpiote_channel = 0;
+    ch_led1->ppi_channels[0] = 4;
+    ch_led1->ppi_channels[1] = 5;
+    ch_led1->target_value = 100;
 
-
-    PWMBase::Channel* ch0 = new PWMBase::Channel();
-    ch0->gpio_pin = 3;
-    ch0->gpiote_channel = 1;
-    ch0->ppi_channels[0] = 2;
-    ch0->ppi_channels[1] = 3;
-    ch0->target_value = 100;
-
-    PWMBase::Channel* ch1 = new PWMBase::Channel();
-    ch1->gpio_pin = 5;
-    ch1->gpiote_channel = 0;
-    ch1->ppi_channels[0] = 4;
-    ch1->ppi_channels[1] = 5;
-    ch1->target_value = 100;
-
-    p->add_channel(ch0);
-    p->add_channel(ch1);
+    p->add_channel(ch_buz);
+    p->add_channel(ch_led0);
+    p->add_channel(ch_led1);
 
     p->initialize();
-
 
 
     bool status;
@@ -134,14 +130,9 @@ int main(void)
     mtimer.start(200);
     status = mtimer.is_good();
 
-    APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
-
-
-    BLEPeripheralDevice::start();
-
     int i = 0;
     while(true) {
-        BLEPeripheralDevice::idle();
+        app.idle();
     }
 
     return 0;
