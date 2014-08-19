@@ -1,9 +1,9 @@
 #ifndef NRFPP_TIMER_HPP
 #define NRFPP_TIMER_HPP
 
-extern "C" {
+#include "ble_application.hpp"
 #include "app_timer.h"
-}
+#include <assert.h>
 
 namespace nrfpp {
 
@@ -12,25 +12,10 @@ enum TimerTypeEN {
     TIMER_REPEATED = APP_TIMER_MODE_REPEATED
 };
 
-
-class BLEAppTimerInitializer 
-{
-public:
-    static const int PRESCALER = 0;
-    static const int NUM_TIMERS = 6;
-    static const int QUEUE_SIZE = 4;
-protected:
-    BLEAppTimerInitializer() {
-        static bool is_timer_module_initialized = false;
-        if(!is_timer_module_initialized) {
-            APP_TIMER_INIT(PRESCALER, NUM_TIMERS, QUEUE_SIZE, false);
-            is_timer_module_initialized = true;
-        }
-    }
-};
-
+// Note: BLEApplication has to be initialized prior to 
+//       instantiating BLEAppTimer objects.
 template <typename TimerEventHandler>
-class BLEAppTimer : public BLEAppTimerInitializer
+class BLEAppTimer
 {
 public:
     explicit BLEAppTimer(TimerTypeEN t, void* context = NULL) 
@@ -43,7 +28,9 @@ public:
     }
     void start(uint32_t ms) 
     {
-        uint32_t ticks = APP_TIMER_TICKS(ms, PRESCALER);
+        BLEApplication& app = BLEApplication::instance();
+        assert(app.is_initialized()); 
+        uint32_t ticks = APP_TIMER_TICKS(ms, app.config().timer_prescaler);
         uint32_t result = app_timer_start(timer_id_, ticks, context_);
         good_ = (result == NRF_SUCCESS);
     }
@@ -57,8 +44,8 @@ public:
     }
 
 private:
-    bool    good_;
-    void*   context_;
+    bool   good_;
+    void*  context_;
     app_timer_id_t  timer_id_;    
 };
 
