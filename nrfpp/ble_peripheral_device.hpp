@@ -77,41 +77,46 @@ public:
     typedef std::list<BLEService*>         ServiceArray;
 
 private:
-    BLEPeripheralDevice() {}
+    BLEPeripheralDevice()
+     : good_(false) 
+    {}
 
 public:
-    static void init(const Params& dp, 
+    static BLEPeripheralDevice& instance();
+    
+public:
+    void init(const Params& dp, 
                      const SecurityParams& sp,
                      const ConnectionParams& cp);
-    static void add_service(BLEService* service);
-    static void add_advertising_data(BLEAdvertisingData* adv_data);
+    void add_service(BLEService* service);
+    void add_advertising_data(BLEAdvertisingData* adv_data);
 
-    static void start_advertising();
-    static void update_advertising();
+    void start_advertising();
+    void update_advertising();
 
-    static void start();
-    static void stop();
+    void start();
+    void stop();
 
-    static void idle();
+    void idle();
     
-    static bool is_good();
+    bool is_good();
 
 private:
     static void peripheraldevice_event_dispatcher(ble_evt_t* evt);
     static void system_event_dispatcher(uint32_t evt);
-    static void init_gap();
-    static void init_connection();
-    static void init_security();
+    void init_gap();
+    void init_connection();
+    void init_security();
 
 private:
-    static bool good_;
-    static Params dp_;
-    static SecurityParams   sp_;
-    static ConnectionParams cp_;
-    static ble_gap_sec_params_t sec_params_;
-    static ble_gap_adv_params_t adv_params_;
-    static AdvertisingDataArray advertising_data_;
-    static ServiceArray         services_;
+    bool good_;
+    Params dp_;
+    SecurityParams   sp_;
+    ConnectionParams cp_;
+    ble_gap_sec_params_t sec_params_;
+    ble_gap_adv_params_t adv_params_;
+    AdvertisingDataArray advertising_data_;
+    ServiceArray         services_;
 };
 
 }

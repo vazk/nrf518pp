@@ -12,6 +12,12 @@
 #include "nrfpp/ble_advertising_data.hpp"
 #include "nrfpp/ble_app_timer.hpp"
 
+
+using nrfpp::BLEApplication;
+using nrfpp::BLEPeripheralDevice;
+using nrfpp::BLEService;
+using nrfpp::BLECharacteristic;
+
 class TestAdvData : public nrfpp::BLEAdvertisingData
 {
 public:
@@ -31,22 +37,18 @@ public:
     static void on_timer(void* context) {
         TestAdvData* tad = (TestAdvData*)context;
         tad->incr();
-        nrfpp::BLEPeripheralDevice::update_advertising();
+        BLEPeripheralDevice::instance().update_advertising();
     }
     
 };
 
-using nrfpp::BLEApplication;
-using  nrfpp::BLEPeripheralDevice;
-using  nrfpp::BLEService;
-using  nrfpp::BLECharacteristic;
-
 int main(void)
 {
-
+    // instantiate and initialize the application scheduler.
     BLEApplication& app = BLEApplication::instance();
     app.initialize(BLEApplication::Config());
 
+    // setup all the required parameters for initialization of BLEPeripheralDevice
     BLEPeripheralDevice::Params dp;
     dp.name = "poxosBLE";
     dp.cconf = nrfpp::SYNTH_250;
@@ -72,30 +74,37 @@ int main(void)
     cp.conn_first_params_update_delay_ms = 5000;
     cp.conn_next_params_update_delay_ms = 10000;
 
-    BLEPeripheralDevice::init(dp, sp, cp);
+    // get the reference to the singleton object of BLEPeripheralDevice
+    BLEPeripheralDevice& pdevice = BLEPeripheralDevice::instance();
+    pdevice.init(dp, sp, cp);
 
+    // instantiate a service and a characteristic
     BLEService* bs = new BLEService(0x1523, BLE_UUID_TYPE_BLE);
     BLECharacteristic* ch = new BLECharacteristic(0x1524, "bla",
                                                   false, false, 
                                                   true, false, 
                                                   1, nrfpp::LOC_STACK);
+    // add the characteristic to the service
     bs->add_characteristic(ch);
-    
-    BLEPeripheralDevice::add_service(bs);
-
+    // now add the service to the peripheral device 
+    pdevice.add_service(bs);
+    // also add simple adverticement data 
     TestAdvData* tad = new TestAdvData();
-    BLEPeripheralDevice::add_advertising_data(tad);
+    pdevice.add_advertising_data(tad);
 
+    // set up this timer to modify the adverticement data periodically
     nrfpp::BLEAppTimer<AdvDataUpdater> adu_timer(nrfpp::TIMER_REPEATED, tad);
     bool status = adu_timer.is_good();
     adu_timer.start(800);
     status = adu_timer.is_good();
 
-    BLEPeripheralDevice::start_advertising();
-
+    // start the device
+    pdevice.start_advertising();
+    
+    // application scheduler and softdevice event handler loops.
     while(true) {
         app.idle();
-        BLEPeripheralDevice::idle();
+        pdevice.idle();
     }
 
     return 0;

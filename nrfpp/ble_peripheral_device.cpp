@@ -46,15 +46,12 @@ conn_params_error_handler(uint32_t nrf_error)
 
 namespace nrfpp {
 
-// initialization of static members...
-bool BLEPeripheralDevice::good_ = false;
-BLEPeripheralDevice::Params                BLEPeripheralDevice::dp_;
-BLEPeripheralDevice::SecurityParams        BLEPeripheralDevice::sp_;
-BLEPeripheralDevice::ConnectionParams      BLEPeripheralDevice::cp_;
-BLEPeripheralDevice::ServiceArray          BLEPeripheralDevice::services_;
-BLEPeripheralDevice::AdvertisingDataArray  BLEPeripheralDevice::advertising_data_;
-ble_gap_sec_params_t   BLEPeripheralDevice::sec_params_;
-ble_gap_adv_params_t   BLEPeripheralDevice::adv_params_;
+BLEPeripheralDevice&
+BLEPeripheralDevice::instance()
+{
+    static BLEPeripheralDevice s_peripheral_device;
+    return s_peripheral_device;
+}
 
 void
 BLEPeripheralDevice::init(const BLEPeripheralDevice::Params& dp,
@@ -103,6 +100,7 @@ BLEPeripheralDevice::idle()
 void 
 BLEPeripheralDevice::peripheraldevice_event_dispatcher(ble_evt_t* evt)
 {
+    BLEPeripheralDevice& pdevice = BLEPeripheralDevice::instance();
     // standard event handler for system/connectivity events
     ble_conn_params_on_ble_evt(evt);
     // application's ble-stack evend handler
@@ -118,14 +116,14 @@ BLEPeripheralDevice::peripheraldevice_event_dispatcher(ble_evt_t* evt)
             
         case BLE_GAP_EVT_DISCONNECTED:
             s_conn_handle = BLE_CONN_HANDLE_INVALID;
-            start_advertising();
+            pdevice.start_advertising();
             break;
 
         case BLE_GAP_EVT_SEC_PARAMS_REQUEST:
             result = nrfpp_sd_ble_gap_sec_params_reply(s_conn_handle, 
                                                       BLE_GAP_SEC_STATUS_SUCCESS, 
-                                                      &sec_params_);
-            good_ = (result == NRF_SUCCESS);
+                                                      &pdevice.sec_params_);
+            pdevice.good_ = (result == NRF_SUCCESS);
             break;
             
         case BLE_GAP_EVT_AUTH_STATUS:
@@ -134,18 +132,18 @@ BLEPeripheralDevice::peripheraldevice_event_dispatcher(ble_evt_t* evt)
 
         case BLE_GATTS_EVT_SYS_ATTR_MISSING:
             result = nrfpp_sd_ble_gatts_sys_attr_set(s_conn_handle, NULL, 0);
-            good_ = (result == NRF_SUCCESS);
+            pdevice.good_ = (result == NRF_SUCCESS);
             break;
 
         case BLE_GAP_EVT_SEC_INFO_REQUEST:
             enc_info = &s_auth_status.periph_keys.enc_info;
             if(enc_info->div == evt->evt.gap_evt.params.sec_info_request.div) {
                 result = nrfpp_sd_ble_gap_sec_info_reply(s_conn_handle, enc_info, NULL);
-                good_ = (result == NRF_SUCCESS);
+                pdevice.good_ = (result == NRF_SUCCESS);
             } else {
                 // No keys found for this device.
                 result = nrfpp_sd_ble_gap_sec_info_reply(s_conn_handle, NULL, NULL);
-                good_ = (result == NRF_SUCCESS);
+                pdevice.good_ = (result == NRF_SUCCESS);
             }
             break;
 
@@ -183,8 +181,8 @@ BLEPeripheralDevice::peripheraldevice_event_dispatcher(ble_evt_t* evt)
     }
 
     // service event handlers
-    std::list<BLEService*>::iterator sit = services_.begin();
-    std::list<BLEService*>::iterator esit = services_.end();
+    std::list<BLEService*>::iterator sit = pdevice.services_.begin();
+    std::list<BLEService*>::iterator esit = pdevice.services_.end();
     for(; sit != esit; ++sit) {
         (*sit)->on_event(evt);
     }
