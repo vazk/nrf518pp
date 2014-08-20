@@ -16,7 +16,7 @@ int      _fstat(int fd, struct stat *st);
 int      _getpid();
 int      _isatty(int fd);
 int      _kill(int pid, int sig);
-int      _link(char *old, char *new);
+int      _link(char *oldx, char *newx);
 int      _lseek(int fd, int ptr, int dir);
 caddr_t  _sbrk(int incr);
 int      _read(int fd, char *ptr, int len);

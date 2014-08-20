@@ -66,27 +66,6 @@ int _lseek(int file, int ptr, int dir)
 }
 
 
-caddr_t _sbrk(int incr)
-{
-    extern char *__bss_end__; 	// defined by the linker
-    static char *heap_end;
-    char        *prev_heap_end;
-	char        *stack;
-
-    if (heap_end == 0) {
-        heap_end = __bss_end__;
-    }
-    prev_heap_end = heap_end;
-	stack = (char*) __get_MSP();
-	if (heap_end + incr >  stack) {
-         errno = ENOMEM;
-         return  (caddr_t) -1;
-         //abort ();
-	}
-    heap_end += incr;
-    return (caddr_t) prev_heap_end;
-}
-
 
 
 
