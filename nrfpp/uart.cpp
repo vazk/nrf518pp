@@ -1,9 +1,31 @@
 #include "uart.hpp"
 
+
+//#include <errno.h>
+//#include <sys/stat.h>
+//#include <sys/times.h>
+//#include <sys/unistd.h>
+#include <stdio.h>
+
+
 namespace nrfpp 
 {
 
-UART::UART(const UART::Config& config)
+UART&
+UART::instance()
+{
+    static UART s_uart;
+    return s_uart;
+}
+
+
+UART::UART()
+ : is_initialized_(false)
+{
+}
+
+void 
+UART::initialize(const UART::Config& config)
 {
     // setup the rx/tx pins
     nrf_gpio_cfg_output(config.tx_pin);
@@ -25,6 +47,13 @@ UART::UART(const UART::Config& config)
     NRF_UART0->TASKS_STARTTX = 1;
     NRF_UART0->TASKS_STARTRX = 1;
     NRF_UART0->EVENTS_RXDRDY = 0;
+
+    // [review] setting the buffer size to 0 to avoid buffering...
+    //setbuf(stdin, NULL);
+    //setbuf(stdout, NULL);
+
+    is_initialized_ = true;
+    
 }
 
 void UART::put(uint8_t b)

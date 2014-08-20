@@ -35,15 +35,23 @@ public:
         uint8_t cts_pin;
         uint8_t rts_pin;
         bool hardware_control;
-        bool blocking;
     };
 
-public:
-    UART(const Config& config);
+private:
+    UART();
 
+public:
+    static UART& instance(); 
+
+public:
+    void  initialize(const Config& config);
+    bool  is_initialized() const { return is_initialized_; }
     void  put(uint8_t b);
     void  get(uint8_t* b);
     bool  get_timeout(uint8_t* b, uint32_t ms);
+
+private:
+    bool is_initialized_;
 };
 
 }
