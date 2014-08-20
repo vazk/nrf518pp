@@ -33,7 +33,7 @@ public:
         uint8_t rx_pin;
         uint8_t tx_pin;
         uint8_t cts_pin;
-        uint8_t rxd_pin;
+        uint8_t rts_pin;
         bool hardware_control;
         bool blocking;
     };

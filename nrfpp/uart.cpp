@@ -5,6 +5,26 @@ namespace nrfpp
 
 UART::UART(const UART::Config& config)
 {
+    // setup the rx/tx pins
+    nrf_gpio_cfg_output(config.tx_pin);
+    nrf_gpio_cfg_input(config.rx_pin, NRF_GPIO_PIN_NOPULL);
+    NRF_UART0->PSELTXD = config.tx_pin;
+    NRF_UART0->PSELRXD = config.rx_pin;
+    // setup the cts and rts pins if hardware control is requested
+    if (config.hardware_control) {
+        nrf_gpio_cfg_output(config.rts_pin);
+        nrf_gpio_cfg_input(config.cts_pin, NRF_GPIO_PIN_NOPULL);
+        NRF_UART0->PSELCTS = config.cts_pin;
+        NRF_UART0->PSELRTS = config.rts_pin;
+        NRF_UART0->CONFIG  = (UART_CONFIG_HWFC_Enabled << UART_CONFIG_HWFC_Pos);
+    }
+    // set the baudrate
+    NRF_UART0->BAUDRATE      = (config.bitrate << UART_BAUDRATE_BAUDRATE_Pos);
+    // and enable the driver
+    NRF_UART0->ENABLE        = (UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos);
+    NRF_UART0->TASKS_STARTTX = 1;
+    NRF_UART0->TASKS_STARTRX = 1;
+    NRF_UART0->EVENTS_RXDRDY = 0;
 }
 
 void UART::put(uint8_t b)
