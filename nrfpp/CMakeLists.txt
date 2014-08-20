@@ -2,6 +2,7 @@
 SET(OUTPUT_FILENAME  nrfpp)
 
 SET(PROJECT_SOURCES  wrappers.c
+                     syscalls.c
                      pwm.cpp
                      buzzer.cpp
                      uart.cpp
