@@ -1,5 +1,6 @@
 #include "ble_application.hpp"
 #include "app_scheduler.h"
+#include "nrf51.h"
 #include <assert.h>
 
 namespace nrfpp 
