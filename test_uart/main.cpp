@@ -34,12 +34,12 @@ int main(void)
 
 
     UART& uart = UART::instance();
-    UART::Config config = {UART::BR_38400, 0,0,0,0,false};
+    UART::Config config = {UART::BR_230400,3,7,0,0,false};
     uart.initialize(config);
 
     BLEAppTimer<UARTTester> timer(nrfpp::TIMER_REPEATED);
     bool status = timer.is_good();
-    timer.start(300);
+    timer.start(50);
     status = timer.is_good();
 
     int i = 0;
