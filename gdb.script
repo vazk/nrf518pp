@@ -18,7 +18,5 @@ set remote memory-write-packet-size 1024
 load
 monitor reset
 b main
-b softdevice_assertion_handler
-catch throw
 c
 
