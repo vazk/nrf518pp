@@ -1,12 +1,5 @@
 #include "uart.hpp"
-
-
-//#include <errno.h>
-//#include <sys/stat.h>
-//#include <sys/times.h>
-//#include <sys/unistd.h>
 #include <stdio.h>
-
 
 namespace nrfpp 
 {
@@ -93,4 +86,34 @@ bool UART::get_timeout(uint8_t* pb, uint32_t timeout_ms)
     return status;
 }
 
+}
+
+extern "C" {
+#include "uart_redirect.h"
+int redirect_read(char *ptr, int len)
+{
+    nrfpp::UART& uart = nrfpp::UART::instance();
+    uint8_t b;
+    if(uart.is_initialized()) {
+        for(int i = 0; i < len; ++i) {
+            uart.get(&b);
+            ptr[i] = (char)b;
+        }
+    } else {
+        return -1;
+    }
+}
+
+int redirect_write(char *ptr, int len)
+{
+    nrfpp::UART& uart = nrfpp::UART::instance();
+    if(uart.is_initialized()) {
+        for(int i = 0; i < len; ++i) {
+            uart.put((uint8_t)ptr[i]);
+        }
+        return len;
+    } else {
+        return -1;
+    }
+}
 }
