@@ -57,8 +57,8 @@ SET(TARGET_CHIP  NRF51822_QFAA_CA)
 SET(DEVICE_VARIANT xxaa)
 SET(LINKER_SCRIPT gcc_${DEVICESERIES}_s110_${DEVICE_VARIANT}.ld)
 
-SET(CMAKE_C_FLAGS "-mfloat-abi=soft -mcpu=${CPU} -mthumb -mabi=aapcs -D${DEVICE} -D${TARGET_CHIP} -DDEBUG_NRF_USER -DBLE_STACK_SUPPORT_REQD --std=gnu99")
-SET(CMAKE_CXX_FLAGS "-mfloat-abi=soft -mcpu=${CPU} -mthumb -mabi=aapcs -D${DEVICE} -D${TARGET_CHIP} -fno-rtti -fno-exceptions -DDEBUG_NRF_USER -DBLE_STACK_SUPPORT_REQD -DSVCALL_AS_NORMAL_FUNCTION")
+SET(CMAKE_C_FLAGS "-mfloat-abi=soft -mcpu=${CPU} -mthumb -mabi=aapcs -D${DEVICE} -D${TARGET_CHIP} -DDEBUG_NRF_USER -DBLE_STACK_SUPPORT_REQD --std=gnu99 -Os -flto -ffunction-sections -fdata-sections -fno-builtin")
+SET(CMAKE_CXX_FLAGS "-mfloat-abi=soft -mcpu=${CPU} -mthumb -mabi=aapcs -D${DEVICE} -D${TARGET_CHIP} -fno-rtti -fno-exceptions -DDEBUG_NRF_USER -DBLE_STACK_SUPPORT_REQD -DSVCALL_AS_NORMAL_FUNCTION -Os -flto -ffunction-sections -fdata-sections -fno-builtin")
 
 LINK_DIRECTORIES(${CROSS_COMPILE}/arm-none-eabi/lib/armv6-m
                  ${CROSS_COMPILE}/lib/gcc/arm-none-eabi/armv6-m
@@ -68,10 +68,7 @@ LINK_DIRECTORIES(${CROSS_COMPILE}/arm-none-eabi/lib/armv6-m
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 
-SET(CMAKE_EXE_LINKER_FLAGS "-Xlinker -Map=binary.map -mcpu=${CPU} -mthumb -mabi=aapcs -T${TEMPLATE_PATH}/gcc/${LINKER_SCRIPT} --specs=nano.specs ")
-
-
-
+SET(CMAKE_EXE_LINKER_FLAGS "-Xlinker -Map=binary.map -mcpu=${CPU} -mthumb -mabi=aapcs -T${TEMPLATE_PATH}/gcc/${LINKER_SCRIPT} --specs=nano.specs -Wl,--gc-sections -flto")
 
 
 
@@ -88,5 +85,6 @@ ADD_SUBDIRECTORY(test_adv_data)
 ADD_SUBDIRECTORY(test_pwm)
 ADD_SUBDIRECTORY(test_buzzer)
 ADD_SUBDIRECTORY(test_timer)
+ADD_SUBDIRECTORY(test_uart)
 ADD_SUBDIRECTORY(test_buzzer_led_timer)
 
