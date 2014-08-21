@@ -1,6 +1,6 @@
 SET(OUTPUT_FILENAME  test_uart)
 
-SET(PROJECT_SOURCES  main.cpp)
+SET(PROJECT_SOURCES  main.cpp ../syscalls.c)
 SET(NRF_ASM_SOURCES  ${TEMPLATE_PATH}/gcc/gcc_startup_${DEVICESERIES}.s)
 
 
