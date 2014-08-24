@@ -81,7 +81,8 @@ ADD_SUBDIRECTORY(nrfpp)
 ###################################################
 #### PREPARING THE APP 			       ####
 ###################################################
-ADD_SUBDIRECTORY(test_adv_data)
+ADD_SUBDIRECTORY(test_ble_advdata)
+ADD_SUBDIRECTORY(test_ble_service)
 ADD_SUBDIRECTORY(test_pwm)
 ADD_SUBDIRECTORY(test_buzzer)
 ADD_SUBDIRECTORY(test_timer)
