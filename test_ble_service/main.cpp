@@ -18,29 +18,6 @@ using nrfpp::BLEPeripheralDevice;
 using nrfpp::BLEService;
 using nrfpp::BLECharacteristic;
 
-class TestAdvData : public nrfpp::BLEAdvertisingData
-{
-public:
-    TestAdvData() : BLEAdvertisingData(0x1527), byte_(0) {}
-    uint16_t size() { return 1; }
-    uint8_t* data() { return &byte_; }
-    void incr() { byte_++; }
-private:
-    uint8_t byte_;
-};
-
-
-class AdvDataUpdater
-{
-public:
-    AdvDataUpdater(TestAdvData* tad) {}
-    static void on_timer(void* context) {
-        TestAdvData* tad = (TestAdvData*)context;
-        tad->incr();
-        BLEPeripheralDevice::instance().update_advertising();
-    }
-    
-};
 
 int main(void)
 {
@@ -88,15 +65,6 @@ int main(void)
     bs->add_characteristic(ch);
     // now add the service to the peripheral device 
     pdevice.add_service(bs);
-    // also add simple adverticement data 
-    TestAdvData* tad = new TestAdvData();
-    pdevice.add_advertising_data(tad);
-
-    // set up this timer to modify the adverticement data periodically
-    nrfpp::BLEAppTimer<AdvDataUpdater> adu_timer(nrfpp::TIMER_REPEATED, tad);
-    bool status = adu_timer.is_good();
-    adu_timer.start(800);
-    status = adu_timer.is_good();
 
     // start the device
     pdevice.start_advertising();
