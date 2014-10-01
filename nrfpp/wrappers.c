@@ -64,6 +64,12 @@ uint32_t nrfpp_sd_ble_gatts_characteristic_add(uint16_t                   servic
     return sd_ble_gatts_characteristic_add(service_handle, char_md, attr_char_value, handles);
 }
 
+uint32_t nrfpp_sd_ble_gatts_rw_authorize_reply(uint16_t conn_handle, 
+                                               ble_gatts_rw_authorize_reply_params_t const* p_rw_authorize_reply_params)
+{
+    return sd_ble_gatts_rw_authorize_reply(conn_handle, p_rw_authorize_reply_params);
+}
+
 uint32_t nrfpp_sd_ble_uuid_vs_add(ble_uuid128_t const* vs_uuid, uint8_t* uuid_type)
 {
     return sd_ble_uuid_vs_add(vs_uuid, uuid_type);
