@@ -33,6 +33,7 @@ protected:
     void on_disconnect(ble_evt_t* evt);
     void on_write(ble_evt_t* evt);
     void on_timeout(ble_evt_t* evt);
+    void on_authorize_rw_request(ble_evt_t* evt);
 
 protected:
     uint16_t uuid_;
