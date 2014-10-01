@@ -83,6 +83,7 @@ ADD_SUBDIRECTORY(nrfpp)
 ###################################################
 ADD_SUBDIRECTORY(test_ble_advdata)
 ADD_SUBDIRECTORY(test_ble_service)
+ADD_SUBDIRECTORY(test_ble_led_control)
 ADD_SUBDIRECTORY(test_pwm)
 ADD_SUBDIRECTORY(test_buzzer)
 ADD_SUBDIRECTORY(test_timer)
