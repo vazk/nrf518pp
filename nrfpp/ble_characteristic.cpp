@@ -65,12 +65,39 @@ BLECharacteristic::register_self(uint16_t service_handle,
     return (result == NRF_SUCCESS);
 }
 
+bool
+BLECharacteristic::grant_authorization(nrfpp::AuthorizationEN auth, uint16_t conn_handle)
+{
+
+    ble_gatts_rw_authorize_reply_params_t auth_reply;
+    auth_reply.type = (uint8_t)auth;
+    switch(auth) {
+        case nrfpp::AUTH_READ: 
+            auth_reply.params.read.gatt_status = BLE_GATT_STATUS_SUCCESS;
+            break;
+        case nrfpp::AUTH_WRITE: 
+            auth_reply.params.write.gatt_status = BLE_GATT_STATUS_SUCCESS;
+            break;
+        default: return false; 
+    }
+    uint32_t result = nrfpp_sd_ble_gatts_rw_authorize_reply(conn_handle, &auth_reply);
+    return (result == NRF_SUCCESS);
+}
+
 void
-BLECharacteristic::on_read(ble_gatts_evt_read_t* evt)
+BLECharacteristic::on_connect(ble_gap_evt_connected_t* evt)
 {
     // evt->data[..]
     // evt->len
 }
+
+void
+BLECharacteristic::on_disconnect(ble_gap_evt_disconnected_t* evt)
+{
+    // evt->data[..]
+    // evt->len
+}
+
 
 void
 BLECharacteristic::on_write(ble_gatts_evt_write_t* evt)
@@ -85,5 +112,15 @@ BLECharacteristic::on_timeout(ble_gatts_evt_timeout_t* evt)
     // evt->data[..]
     // evt->len
 }
+
+void
+BLECharacteristic::on_authorize_rw_request(ble_gatts_evt_rw_authorize_request_t* evt,
+                                           uint16_t conn_handle)
+{
+    // evt->data[..]
+    // evt->len
+}
+
+
 
 }
