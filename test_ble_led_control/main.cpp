@@ -23,13 +23,14 @@ using nrfpp::UART;
 
 class BLELedControllerCharacteristic : public BLECharacteristic
 {
+    enum { LED_PIN = 5 };
 public:
     BLELedControllerCharacteristic(uint16_t char_uuid, const char* char_name)
      : BLECharacteristic(char_uuid, char_name, true, true, true, true, 1, nrfpp::LOC_STACK)
-    {} 
+    {
+        nrf_gpio_cfg_output(LED_PIN);
+    } 
 protected:
-
-
     void on_connect(ble_gap_evt_connected_t* evt)
     {
         printf("on_connect!\n");
@@ -50,7 +51,23 @@ protected:
     void on_authorize_rw_request(ble_gatts_evt_rw_authorize_request_t* evt,
                                  uint16_t conn_handle)
     {
-        printf("on_auth_rw!\n");
+        printf("on_auth_rw! ");
+        switch((nrfpp::AuthorizationEN)evt->type) {
+            case nrfpp::AUTH_READ : 
+                printf("read\n");
+                break;
+            case nrfpp::AUTH_WRITE : 
+                printf("write[%d]\n", (int)evt->request.write.data[0]);
+                if(evt->request.write.data[0]) {
+                    nrf_gpio_pin_set(LED_PIN);
+                } else {
+                    nrf_gpio_pin_clear(LED_PIN);
+                }
+
+                break;
+            default:
+                printf("\n");
+        }
         grant_authorization((nrfpp::AuthorizationEN)evt->type, conn_handle);
     }
 };
